@@ -24,7 +24,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
@@ -33,16 +34,11 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // Login & Registration - Public
-            		.requestMatchers(
-            			    "/api/users/register",
-            			    "/api/users/login"
-            			).permitAll()
-
-
-                // =========================
-                // JOB MANAGEMENT
-                // =========================
+                // Login and Registration - Public
+                .requestMatchers(
+                    "/api/users/register",
+                    "/api/users/login"
+                ).permitAll()
 
                 // Admin - Add Job
                 .requestMatchers(
@@ -61,11 +57,6 @@ public class SecurityConfig {
                     HttpMethod.DELETE,
                     "/jobs/**"
                 ).hasRole("ADMIN")
-
-
-                // =========================
-                // JOB APPLICATION
-                // =========================
 
                 // Job Seeker - Apply for Job
                 .requestMatchers(
@@ -97,8 +88,7 @@ public class SecurityConfig {
                     "/applications/**"
                 ).hasRole("ADMIN")
 
-
-                // Other requests
+                // All other requests require authentication
                 .anyRequest().authenticated()
             );
 
@@ -110,18 +100,27 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
+        // Allow local and deployed Angular frontend
         configuration.setAllowedOrigins(
-            List.of("http://localhost:4200")
+            List.of(
+                "http://localhost:4200",
+                "https://jobinternshipportal-frontend.onrender.com"
+            )
         );
 
         configuration.setAllowedMethods(
-            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+            )
         );
 
         configuration.setAllowedHeaders(
@@ -133,7 +132,10 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source =
             new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(
+            "/**",
+            configuration
+        );
 
         return source;
     }
